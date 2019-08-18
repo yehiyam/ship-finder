@@ -1,81 +1,32 @@
 const request = require('request-promise');
 const htmlparser = require("htmlparser2");
+const domutils = require("domutils");
 const queryString = require('query-string');
 const { CronJob } = require('cron');
-// const getShip=async () => {
-//     try {
-//         const html = await request('https://www.heritage-expeditions.com/ship-map/');
-//         return new Promise((resolve, reject) => {
-//             const handler = new htmlparser.DomHandler((error, dom)=> {
-//                 if (error){
-//                     console.error(error); 
-//                     return reject(error);
-//                 }
-//                 else {
-//                     const src = dom[0].attribs.src;
-//                     const srcUnescaped = src.replace(new RegExp('&amp;', 'g'),'&');
-//                     const srcParsed = queryString.parse(srcUnescaped);
-//                     const latlong = srcParsed.ll;
-//                     const [lat,long] = latlong.split(',');
-//                     return resolve({
-//                         timestamp: Date.now(),
-//                         lat,
-//                         long
-//                     })
-//                 }
-//             });
-//             const parser = new htmlparser.Parser(handler);
-//             parser.write(html);
-//             parser.end();
-//         });
 
-
-//     } catch (error) {
-//         console.error(error);        
-//     }
-
-// };
+const regex = /markers: JSON\.parse\('(.*)'\)/gm;
 
 const getShip = () => {
     return new Promise((resolve, reject) => {
-        request('https://www.heritage-expeditions.com/ship-map/')
+        request('https://www.heritage-expeditions.com/captains-log/')
             .then(html => {
-                const handler = new htmlparser.DomHandler((error, dom) => {
-                    if (error) {
-                        console.error(error);
-                        return reject(error);
-                    }
-                    else {
-                        const src = dom[0].attribs.src;
-                        const srcUnescaped = src.replace(new RegExp('&amp;', 'g'), '&');
-                        const srcParsed = queryString.parse(srcUnescaped);
-                        const latlong = srcParsed.ll;
-                        const [lat, long] = latlong.split(',');
-                        return resolve({
-                            timestamp: Date.now(),
-                            lat,
-                            long
-                        })
-                    }
-                });
-                const parser = new htmlparser.Parser(handler);
-                parser.write(html);
-                parser.end();
+                const m = regex.exec(html);
+                console.log(m[1]);
+                const data = JSON.parse(m[1]);
+                return resolve(data.map(d=>({
+                    timestamp: Date.now(),
+                    date: new Date(),
+                    lat: d.lat,
+                    long: d.lng,
+                    title: d.title
+
+                })))
             }).catch(error => {
                 return reject(error);
             })
     });
 };
 const main = async () => {
-    // const job = new CronJob({
-    //     cronTime: '*/1 * * * *',
-    //     onTick: async () => {
-    //         const res = await getShip();
-    //         console.log(res)
-    //     },
-    //     start: true,
-    //     timeZone: 'Asia/Jerusalem'
-    //   });
     const res = await getShip();
     console.log(res)
 }
