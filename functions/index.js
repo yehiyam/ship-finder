@@ -43,7 +43,7 @@ exports.findShip = functions.https.onRequest((req, res) => {
     getShip()
         .then(locations => {
             locations.forEach(location => {
-                db.collection('ship-location').add(location);
+                db.collection('ship-location-new').add(location);
                 res.json(location);
             })
         })
