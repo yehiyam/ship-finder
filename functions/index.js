@@ -5,6 +5,7 @@ const secureCompare = require('secure-compare');
 const admin = require('firebase-admin');
 admin.initializeApp();
 const db = admin.firestore();
+const regex = /markers: JSON\.parse\('(.*)'\)/gm;
 
 const getShip = () => {
     return new Promise((resolve, reject) => {
@@ -36,8 +37,7 @@ exports.findShip = functions.https.onRequest((req, res) => {
     if (!secureCompare(key, functions.config().cron.key)) {
         console.log('The key provided in the request does not match the key set in the environment. Check that', key,
             'matches the cron.key attribute in `firebase env:get`');
-        res.status(403).send('Security key does not match. Make sure your "key" URL query parameter matches the ' +
-            'cron.key environment variable.');
+        res.status(403).send('Unauthorized.');
         return null;
     }
     getShip()
@@ -49,6 +49,7 @@ exports.findShip = functions.https.onRequest((req, res) => {
         })
         .catch(error => {
             console.error(error);
+            res.status(500);
         });
 
 });

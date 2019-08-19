@@ -1,6 +1,9 @@
 {
   "name": "functions",
   "description": "Cloud Functions for Firebase",
+  "engines": {
+    "node": "10"
+  },
   "scripts": {
     "lint": "eslint .",
     "serve": "firebase serve --only functions",
@@ -12,7 +15,7 @@
   "dependencies": {
     "decode-uri-component": "^0.2.0",
     "firebase-admin": "~5.12.1",
-    "firebase-functions": "^1.0.3",
+    "firebase-functions": "^3.2.0",
     "htmlparser2": "^3.9.2",
     "query-string": "^6.1.0",
     "request": "^2.85.0",

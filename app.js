@@ -1,8 +1,4 @@
 const request = require('request-promise');
-const htmlparser = require("htmlparser2");
-const domutils = require("domutils");
-const queryString = require('query-string');
-const { CronJob } = require('cron');
 
 const regex = /markers: JSON\.parse\('(.*)'\)/gm;
 
