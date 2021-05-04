@@ -6,7 +6,7 @@ const admin = require('firebase-admin');
 admin.initializeApp();
 const db = admin.firestore();
 const regex = /markers: JSON\.parse\('(.*)'\)/gm;
-const regexMayas = /long=([d.]*).*lat=([d.+-]*)/gm;
+const regexMayas = /long=([\d.]*).*lat=([\d.-]*)/gm;
 
 const getShip = () => {
     return new Promise((resolve, reject) => {
@@ -34,13 +34,13 @@ const getShipMayas = () => {
         request('https://www.aldabraexpeditions.com/mayas-dugong.html')
             .then(html => {
                 const m = regexMayas.exec(html);
+                console.log(`m=${m}`)
                 if (m && m.length === 3){
-                    console.log(m[1]);
                     return resolve(({
                         timestamp: Date.now(),
                         date: new Date(),
-                        lat: m[2],
-                        long: m[1],
+                        lat: parseFloat(m[2]),
+                        long: parseFloat(m[1]),
                         title: 'mayas-dugong'
     
                     }))                    
