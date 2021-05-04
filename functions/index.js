@@ -6,6 +6,7 @@ const admin = require('firebase-admin');
 admin.initializeApp();
 const db = admin.firestore();
 const regex = /markers: JSON\.parse\('(.*)'\)/gm;
+const regexMayas = /long=([d.]*).*lat=([d.+-]*)/gm;
 
 const getShip = () => {
     return new Promise((resolve, reject) => {
@@ -28,6 +29,29 @@ const getShip = () => {
     });
 };
 
+const getShipMayas = () => {
+    return new Promise((resolve, reject) => {
+        request('https://www.aldabraexpeditions.com/mayas-dugong.html')
+            .then(html => {
+                const m = regexMayas.exec(html);
+                if (m && m.length === 3){
+                    console.log(m[1]);
+                    return resolve(({
+                        timestamp: Date.now(),
+                        date: new Date(),
+                        lat: m[2],
+                        long: m[1],
+                        title: 'mayas-dugong'
+    
+                    }))                    
+                }
+                return resolve()
+
+            }).catch(error => {
+                return reject(error);
+            })
+    });
+};
 // Take the text parameter passed to this HTTP endpoint and insert it into the
 // Realtime Database under the path /messages/:pushId/original
 exports.findShip = functions.https.onRequest((req, res) => {
@@ -40,12 +64,15 @@ exports.findShip = functions.https.onRequest((req, res) => {
         res.status(403).send('Unauthorized.');
         return null;
     }
-    getShip()
-        .then(locations => {
-            locations.forEach(location => {
+    return getShipMayas()
+        .then(location => {
+            if (location){
                 db.collection('ship-location-new').add(location);
                 res.json(location);
-            })
+            }
+            else {
+                console.log('no result')
+            }
         })
         .catch(error => {
             console.error(error);
