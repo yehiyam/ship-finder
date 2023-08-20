@@ -52,6 +52,39 @@ const getShipMayas = () => {
             })
     });
 };
+
+const getShipSeaSpirit = () => {
+    return new Promise((resolve, reject) => {
+        request('https://www.cruisemapper.com/map/ships.json?filter=1&zoom=4&imo=8802868&mmsi=255806397',{
+            "headers": {
+                "authority": "www.cruisemapper.com",
+                "accept": "application/json, text/javascript, */*; q=0.01",
+                'accept-language': 'en-US,en;q=0.9,he-IL;q=0.8,he;q=0.7',
+                'referer': 'https://www.cruisemapper.com/?imo=8802868',
+                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36',
+                "x-requested-with": "XMLHttpRequest"
+              },
+              json: true
+        })
+            .then(data => {
+                if (!data || data.length==0){
+                    return resolve()
+                }
+                const myShip = data.find(d=>d.hover==='MV Sea Spirit')
+                return resolve(({
+                    timestamp: myShip.tst,
+                    date: new Date(),
+                    lat: myShip.lat,
+                    long: myShip.lon,
+                    title: myShip.hover
+
+                }))
+            }).catch(error => {
+                return reject(error);
+            })
+    });
+};
+
 // Take the text parameter passed to this HTTP endpoint and insert it into the
 // Realtime Database under the path /messages/:pushId/original
 exports.findShip = functions.https.onRequest((req, res) => {
@@ -64,7 +97,7 @@ exports.findShip = functions.https.onRequest((req, res) => {
         res.status(403).send('Unauthorized.');
         return null;
     }
-    return getShipMayas()
+    return getShipSeaSpirit()
         .then(location => {
             if (location){
                 db.collection('ship-location-new').add(location);
