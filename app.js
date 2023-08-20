@@ -63,7 +63,7 @@ const getShip = () => {
                 }
                 const myShip = data.find(d=>d.hover==='MV Sea Spirit')
                 return resolve(({
-                    timestamp: myShip.tst,
+                    timestamp: myShip.tst*1000,
                     date: new Date(),
                     lat: myShip.lat,
                     long: myShip.lon,
